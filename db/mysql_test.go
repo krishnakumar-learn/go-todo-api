@@ -1,9 +1,9 @@
 package db
 
 import (
-	"testing"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"testing"
 )
 
 // mockDSN is a fake DSN for testing purposes.
