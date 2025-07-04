@@ -1,24 +1,57 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'golang:1.24.1'
+            args '-u root'
+        }
+    }
+
+    environment {
+        HOME = '/go'
+        GO111MODULE = 'on'
+    }
 
     stages {
-        stage('Build') {
-            agent {
-                docker {
-                    image 'golang:1.24.1'
-                    reuseNode true
-                    args '-u root' 
-                }
+        stage('Test') {
+            steps {
+                echo 'Running unit tests...'
+                sh '''
+                    go mod tidy
+                    go test -v -cover ./...
+                '''
             }
+        }
+        stage('Build') {
             steps {
                 echo 'Building Go binary...'
-                sh '''
-                    go version
-                    go mod tidy
-                    go build -o bin/todo-app main.go
-                    ls -la bin/
-                '''
+                sh 'go build -o bin/todo-app main.go'
             }
         }
     }
 }
+
+
+// pipeline {
+//     agent any
+
+//     stages {
+//         stage('Build') {
+//             agent {
+//                 docker {
+//                     image 'golang:1.24.1'
+//                     reuseNode true
+//                     args '-u root' 
+//                 }
+//             }
+//             steps {
+//                 echo 'Building Go binary...'
+//                 sh '''
+//                     go version
+//                     go mod tidy
+//                     go build -o bin/todo-app main.go
+//                     ls -la bin/
+//                 '''
+//             }
+//         }
+//     }
+// }
