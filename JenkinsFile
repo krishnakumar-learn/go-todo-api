@@ -35,11 +35,19 @@ pipeline {
         }
         stage('Test') {
             steps {
-                echo 'Running unit tests...'
+                echo 'Running unit tests with coverage...'
                 sh '''
                     go mod tidy
-                    go test -v -cover ./...
+                    go test -coverprofile=coverage.out ./...
+                    go tool cover -html=coverage.out -o coverage.html
                 '''
+                archiveArtifacts artifacts: 'coverage.out, coverage.html', fingerprint: true
+                publishHTML(target: [
+                    reportDir: '.',
+                    reportFiles: 'coverage.html',
+                    reportName: 'Go Coverage Report',
+                    keepAll: true
+                ])
             }
         }
         stage('Build') {
