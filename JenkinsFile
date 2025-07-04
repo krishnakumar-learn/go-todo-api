@@ -12,6 +12,27 @@ pipeline {
     }
 
     stages {
+        stage('Lint') {
+            steps {
+                echo 'Running gofmt and golint...'
+                sh '''
+                    go install golang.org/x/lint/golint@latest
+
+                    UNFORMATTED=$(gofmt -l .)
+                    if [ -n "$UNFORMATTED" ]; then
+                        echo "The following files are not formatted:"
+                        echo "$UNFORMATTED"
+                        exit 1
+                    fi
+
+                    golint ./... | tee lint-report.txt
+                    if grep -q . lint-report.txt; then
+                        echo "Lint issues found"
+                        exit 1
+                    fi
+                '''
+            }
+        }
         stage('Test') {
             steps {
                 echo 'Running unit tests...'
