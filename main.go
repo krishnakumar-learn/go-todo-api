@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/krishnakumar-learn/go-todo-api/db"
 	"github.com/krishnakumar-learn/go-todo-api/handlers"
-	"github.com/krishnakumar-learn/go-todo-api/repository"
 	"github.com/krishnakumar-learn/go-todo-api/models"
+	"github.com/krishnakumar-learn/go-todo-api/repository"
 
 	"github.com/gin-gonic/gin"
 )

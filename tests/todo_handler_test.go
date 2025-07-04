@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/krishnakumar-learn/go-todo-api/handlers"
-	"github.com/krishnakumar-learn/go-todo-api/repository"
 	"github.com/krishnakumar-learn/go-todo-api/models"
+	"github.com/krishnakumar-learn/go-todo-api/repository"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,6 +14,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
+
 func setupRouter(h *handlers.TodoHandler) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
