@@ -16,6 +16,7 @@ pipeline {
                     go version
                     go mod tidy
                     go build -o bin/todo-app main.go
+                    ls -la bin/
                 '''
             }
         }
