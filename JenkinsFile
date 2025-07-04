@@ -1,16 +1,15 @@
 pipeline {
-    agent {
-        docker {
-            image 'golang:1.24.1'
-            args '-u root' 
-        }
-    }
-    environment {
-        HOME = '/go'
-        GO111MODULE = 'on'
-    }
+    agent any
+
     stages {
         stage('Build') {
+            agent {
+                docker {
+                    image 'golang:1.24.1'
+                    reuseNode true
+                    args '-u root' 
+                }
+            }
             steps {
                 echo 'Building Go binary...'
                 sh '''
