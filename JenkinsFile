@@ -1,18 +1,26 @@
 pipeline {
-    agent {
-        docker {
-            image 'golang:1.24.1'
-            args '-u root'
-        }
+    agent any
+    parameters {
+        string(name: 'IMAGE_NAME', defaultValue: 'go-todo-app', description: 'Name for the Docker image')
+        string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Tag for the Docker image')
     }
-
     environment {
-        HOME = '/go'
-        GO111MODULE = 'on'
+        REGISTRY = 'registry.home.lan'
     }
-
     stages {
         stage('Lint') {
+            agent {
+                docker {
+                    image 'golang:1.24.1'
+                    reuseNode true
+                    args '-u root'
+                }
+            }
+
+            environment {
+                HOME = '/go'
+                GO111MODULE = 'on'
+            }
             steps {
                 echo 'Running gofmt and golint...'
                 sh '''
@@ -34,6 +42,18 @@ pipeline {
             }
         }
         stage('Test') {
+            agent {
+                docker {
+                    image 'golang:1.24.1'
+                    reuseNode true
+                    args '-u root'
+                }
+            }
+
+            environment {
+                HOME = '/go'
+                GO111MODULE = 'on'
+            }
             steps {
                 echo 'Running unit tests with coverage...'
                 sh '''
@@ -50,10 +70,37 @@ pipeline {
                 ])
             }
         }
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Building Go binary...'
-                sh 'go build -o bin/todo-app main.go'
+                script {
+                    echo "Building Docker image: ${params.IMAGE_NAME}:${params.IMAGE_TAG}"
+                    
+                    // Verify Dockerfile exists
+                    sh 'ls -l Dockerfile || echo "Dockerfile not found!"'
+                    
+                    // Build the Docker image
+                    docker.build("${params.IMAGE_NAME}:${params.IMAGE_TAG}")
+                    
+                    // List built images for verification (fixed syntax)
+                    sh "docker images | grep ${params.IMAGE_NAME}"
+                }
+            }
+        }
+        stage('Push to Registry') {
+            steps {
+                script {
+                    echo "Tagging and pushing to ${env.REGISTRY}/${params.IMAGE_NAME}:${params.IMAGE_TAG}"
+                    
+                    // Tag the image for the registry
+                    sh "docker tag ${params.IMAGE_NAME}:${params.IMAGE_TAG} ${env.REGISTRY}/${params.IMAGE_NAME}:${params.IMAGE_TAG}"
+                    
+                    // Push the image
+                    sh "docker push ${env.REGISTRY}/${params.IMAGE_NAME}:${params.IMAGE_TAG}"
+                    
+                    // Verification
+                    echo "Successfully pushed to registry:"
+                    echo "${env.REGISTRY}/${params.IMAGE_NAME}:${params.IMAGE_TAG}"
+                }
             }
         }
     }
